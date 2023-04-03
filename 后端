@@ -1,0 +1,245 @@
+<!-- Spring Boot Starter -->
+<dependencies>
+<dependency>
+<groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+<dependency>
+<groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+<groupId>mysql</groupId>
+<artifactId>mysql-connector-java</artifactId>
+</dependency>
+</dependencies>
+}
+
+spring.datasource.url=jdbc:mysql://localhost:3306/video_sharing_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
+spring.datasource.username=your_username
+spring.datasource.password=your_password
+spring.jpa.hibernate.ddl-auto=update
+
+//User.java
+package com.example.videosharing.entity;
+
+import javax.persistence.*;
+
+@Entity
+@Table(name = "users")
+public class User {
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+private String username;
+private String password;
+private String email;
+
+// Getter and Setter methods
+}
+
+//Video.java
+package com.example.videosharing.entity;
+
+import javax.persistence.*;
+
+@Entity
+@Table(name = "videos")
+public class Video {
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+private String title;
+private String description;
+private String url;
+private Long views;
+private Long likes;
+private Long dislikes;
+
+@ManyToOne
+@JoinColumn(name = "user_id")
+private User user;
+
+// Getter and Setter methods
+}
+
+UserRepository.java
+package com.example.videosharing.repository;
+
+import com.example.videosharing.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+}
+
+//VideoRepository.java
+package com.example.videosharing.repository;
+
+import com.example.videosharing.entity.Video;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface VideoRepository extends JpaRepository<Video, Long> {
+}
+
+//UserService.java
+package com.example.videosharing.service;
+
+import com.example.videosharing.entity.User;
+import com.example.videosharing.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class UserService {
+@Autowired
+private UserRepository userRepository;
+
+public List<User> getAllUsers() {
+return userRepository.findAll();
+}
+
+public User getUserById(Long id) {
+return userRepository.findById(id).orElse(null);
+}
+
+public User createUser(User user) {
+return userRepository.save(user);
+}
+
+public User updateUser(User user) {
+return userRepository.save(user);
+}
+
+public void deleteUser(Long id) {
+userRepository.deleteById(id);
+}
+}
+
+//VideoService.java
+package com.example.videosharing.service;
+
+import com.example.videosharing.entity.Video;
+import com.example.videosharing.repository.VideoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class VideoService {
+@Autowired
+private VideoRepository videoRepository;
+
+public List<Video> getAllVideos() {
+return videoRepository.findAll();
+}
+
+public Video getVideoById(Long id) {
+return videoRepository.findById(id).orElse(null);
+}
+
+public Video createVideo(Video video) {
+return videoRepository.save(video);
+}
+
+public Video updateVideo(Video video) {
+return videoRepository.save(video);
+}
+
+public void deleteVideo(Long id) {
+videoRepository.deleteById(id);
+}
+}
+
+//UserController.java
+package com.example.videosharing.controller;
+
+import com.example.videosharing.entity.User;
+import com.example.videosharing.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+@Autowired
+private UserService userService;
+
+@GetMapping
+public List<User> getAllUsers() {
+return userService.getAllUsers();
+}
+
+@GetMapping("/{id}")
+public User getUserById(@PathVariable Long id) {
+return userService.getUserById(id);
+}
+
+@PostMapping
+public User createUser(@RequestBody User user) {
+return userService.createUser(user);
+}
+
+@PutMapping("/{id}")
+public User updateUser(@PathVariable Long id, @RequestBody User user) {
+user.setId(id);
+return userService.updateUser(user);
+}
+
+@DeleteMapping("/{id}")
+public void deleteUser(@PathVariable Long id) {
+userService.deleteUser(id);
+}
+}
+
+//VideoController.java
+package com.example.videosharing.controller;
+
+import com.example.videosharing.entity.Video;
+import com.example.videosharing.service.VideoService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/videos")
+public class VideoController {
+@Autowired
+private VideoService videoService;
+
+@GetMapping
+public List<Video> getAllVideos() {
+return videoService.getAllVideos();
+}
+
+@GetMapping("/{id}")
+public Video getVideoById(@PathVariable Long id) {
+return videoService.getVideoById(id);
+}
+
+@PostMapping
+public Video createVideo(@RequestBody Video video) {
+return videoService.createVideo(video);
+}
+
+@PutMapping("/{id}")
+public Video updateVideo(@PathVariable Long id, @RequestBody Video video) {
+video.setId(id);
+return videoService.updateVideo(video);
+}
+
+@DeleteMapping("/{id}")
+public void deleteVideo(@PathVariable Long id) {
+videoService.deleteVideo(id);
+}
+}
+
