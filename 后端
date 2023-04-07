@@ -20,7 +20,7 @@ spring.datasource.username=your_username
 spring.datasource.password=your_password
 spring.jpa.hibernate.ddl-auto=update
 
-//User.java
+`User.java`:
 package com.example.videosharing.entity;
 
 import javax.persistence.*;
@@ -38,7 +38,8 @@ private String email;
 // Getter and Setter methods
 }
 
-//Video.java
+`Video.java`:
+
 package com.example.videosharing.entity;
 
 import javax.persistence.*;
@@ -63,7 +64,8 @@ private User user;
 // Getter and Setter methods
 }
 
-UserRepository.java
+`UserRepository.java`:
+
 package com.example.videosharing.repository;
 
 import com.example.videosharing.entity.User;
@@ -74,7 +76,8 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends JpaRepository<User, Long> {
 }
 
-//VideoRepository.java
+`VideoRepository.java`:
+
 package com.example.videosharing.repository;
 
 import com.example.videosharing.entity.Video;
@@ -85,7 +88,8 @@ import org.springframework.stereotype.Repository;
 public interface VideoRepository extends JpaRepository<Video, Long> {
 }
 
-//UserService.java
+`UserService.java`:
+
 package com.example.videosharing.service;
 
 import com.example.videosharing.entity.User;
@@ -121,7 +125,8 @@ userRepository.deleteById(id);
 }
 }
 
-//VideoService.java
+`VideoService.java`:
+
 package com.example.videosharing.service;
 
 import com.example.videosharing.entity.Video;
@@ -157,7 +162,8 @@ videoRepository.deleteById(id);
 }
 }
 
-//UserController.java
+`UserController.java`:
+
 package com.example.videosharing.controller;
 
 import com.example.videosharing.entity.User;
@@ -200,7 +206,8 @@ userService.deleteUser(id);
 }
 }
 
-//VideoController.java
+`VideoController.java`:
+
 package com.example.videosharing.controller;
 
 import com.example.videosharing.entity.Video;
@@ -243,7 +250,8 @@ videoService.deleteVideo(id);
 }
 }
 
-//like.java
+`like.java`:
+
 package com.example.videosharing.entity;
 
 import javax.persistence.*;
@@ -263,7 +271,8 @@ private Video video;
 // getters and setters
 }
 
-//Comment.java
+`Comment.java`:
+
 package com.example.videosharing.entity;
 
 import javax.persistence.*;
@@ -288,7 +297,8 @@ private LocalDateTime timestamp;
 // getters and setters
 }
 
-//LikeRepository.java
+`LikeRepository.java`:
+
 package com.example.videosharing.repository;
 
 import com.example.videosharing.entity.Like;
@@ -297,7 +307,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface LikeRepository extends JpaRepository<Like, Long> {
 }
 
-//CommentRepository.java
+`CommentRepository.java`:
+
 package com.example.videosharing.repository;
 
 import com.example.videosharing.entity.Comment;
@@ -306,7 +317,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 }
 
-//LikeService.java
+`LikeService.java`:
+
 package com.example.videosharing.service;
 
 import com.example.videosharing.entity.Like;
@@ -328,7 +340,8 @@ likeRepository.deleteById(id);
 }
 }
 
-//CommentService.java
+`CommentService.java`:
+
 package com.example.videosharing.service;
 
 import com.example.videosharing.entity.Comment;
@@ -349,7 +362,8 @@ public void deleteComment(Long id) {
 commentRepository.deleteById(id);
 }
 
-//VideoController.java
+`VideoController.java`:
+
 // ... Other API methods ...
 
 @PostMapping("/{videoId}/likes")
