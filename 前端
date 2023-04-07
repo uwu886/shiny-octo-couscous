@@ -1,0 +1,445 @@
+npm install axios element-ui vue-video-player --save
+
+import Vue from 'vue';
+import ElementUI from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
+import App from './App.vue';
+import router from './router';
+import store from './store';
+
+Vue.use(ElementUI);
+
+Vue.config.productionTip = false;
+
+new Vue({
+router,
+store,
+render: h => h(App),
+}).$mount('#app');
+
+`Register.vue`：
+
+<template>
+<div>
+<h1>Register</h1>
+<el-form :model="registerForm" @submit.native.prevent="register">
+<el-form-item label="Username" prop="username">
+<el-input v-model="registerForm.username"></el-input>
+</el-form-item>
+<el-form-item label="Password" prop="password">
+<el-input v-model="registerForm.password" type="password"></el-input>
+</el-form-item>
+<el-form-item>
+<el-button type="primary" @click="register">Register</el-button>
+</el-form-item>
+</el-form>
+</div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+data() {
+return {
+registerForm: {
+username: '',
+password: '',
+},
+};
+},
+methods: {
+async register() {
+try {
+const response = await axios.post('http://localhost:8080/api/users/register', this.registerForm);
+this.$message.success('Registered successfully!');
+this.$router.push('/login');
+} catch (error) {
+this.$message.error('Failed to register.');
+}
+},
+},
+};
+</script>
+
+`Login.vue`：
+<template>
+<div>
+<h1>Login</h1>
+<el-form :model="loginForm" @submit.native.prevent="login">
+<el-form-item label="Username" prop="username">
+<el-input v-model="loginForm.username"></el-input>
+</el-form-item>
+<el-form-item label="Password" prop="password">
+<el-input v-model="loginForm.password" type="password"></el-input>
+</el-form-item>
+<el-form-item>
+<el-button type="primary" @click="login">Login</el-button>
+</el-form-item>
+</el-form>
+</div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+data() {
+return {
+loginForm: {
+username: '',
+password: '',
+},
+};
+},
+methods: {
+async login() {
+try {
+const response = await axios.post('http://localhost:8080/api/users/login', this.loginForm);
+localStorage.setItem('accessToken', response.data.accessToken);
+this.$message.success('Loggedin successfully!');
+this.$router.push('/');
+} catch (error) {
+this.$message.error('Failed to log in.');
+}
+},
+},
+};
+</script>
+`Upload.vue`:
+
+```html
+<template>
+<div>
+<h1>Upload Video</h1>
+<el-form :model="uploadForm" @submit.native.prevent="upload">
+<el-form-item label="Title" prop="title">
+<el-input v-model="uploadForm.title"></el-input>
+</el-form-item>
+<el-form-item label="Description" prop="description">
+<el-input v-model="uploadForm.description" type="textarea"></el-input>
+</el-form-item>
+<el-form-item label="Video File">
+<el-upload
+:file-list="fileList"
+:before-upload="beforeUpload"
+:on-success="onSuccess"
+:on-error="onError"
+action="http://localhost:8080/api/videos"
+accept="video/*"
+:headers="{ Authorization: 'Bearer ' + localStorage.getItem('accessToken') }"
+>
+<el-button slot="trigger" size="small" type="primary">Select Video</el-button>
+</el-upload>
+</el-form-item>
+<el-form-item>
+<el-button type="primary" @click="upload">Upload</el-button>
+</el-form-item>
+</el-form>
+</div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+data() {
+return {
+fileList: [],
+uploadForm: {
+title: '',
+description: '',
+},
+};
+},
+methods: {
+beforeUpload(file) {
+this.fileList = [file];
+return false;
+},
+onSuccess(response, file, fileList) {
+this.$message.success('Upload succeeded.');
+this.$router.push('/');
+},
+onError(err, file, fileList) {
+this.$message.error('Upload failed.');
+},
+async upload() {
+const formData = new FormData();
+formData.append('title', this.uploadForm.title);
+formData.append('description', this.uploadForm.description);
+formData.append('file', this.fileList[0]);
+try {
+const response = await axios.post('http://localhost:8080/api/videos', formData, {
+headers: {
+'Content-Type': 'multipart/form-data',
+Authorization: 'Bearer ' + localStorage.getItem('accessToken'),
+},
+});
+this.onSuccess(response);
+} catch (error) {
+this.onError(error);
+}
+},
+},
+};
+</script>
+
+`VideoPlayer.vue`:
+
+<template>
+<div>
+<h1>Video Player</h1>
+<video-player class="vjs-custom-skin" :options="playerOptions"></video-player>
+</div>
+</template>
+
+<script>
+import 'video.js/dist/video-js.css';
+import { videoPlayer } from 'vue-video-player';
+import 'vue-video-player/src/custom-theme.css';
+
+export default {
+components: {
+videoPlayer,
+},
+data() {
+return {
+playerOptions: {
+autoplay: true,
+controls: true,
+sources: [
+{
+type: 'video/mp4',
+src: 'http://localhost:8080/api/videos/1', // replace with the correct video URL
+},
+],
+},
+};
+},
+};
+</script>
+
+import Vue from 'vue';
+import Router from 'vue-router';
+import Register from '@/views/Register.vue';
+import Login from '@/views/Login.vue';
+import Upload from '@/views/Upload.vue';
+import VideoPlayer from '@/views/VideoPlayer.vue';
+
+Vue.use(Router);
+
+export default new Router({
+routes: [
+{
+path: '/register',
+name: 'register',
+component: Register,
+},
+{
+path: '/login',
+name: 'login',
+component: Login,
+},
+{
+path: '/upload',
+name: 'upload',
+component: Upload,
+},
+{
+path: '/video/:id',
+name: 'videoPlayer',
+component: VideoPlayer,
+},
+],
+}
+
+`VideoList.vue`:
+
+<template>
+<div>
+<h1>Video List</h1>
+<el-table :data="videos" border>
+<el-table-column prop="title" label="Title" width="180"></el-table-column>
+<el-table-column prop="description" label="Description" width="260"></el-table-column>
+<el-table-column prop="createdAt" label="Upload Time" width="180"></el-table-column>
+<el-table-column label="Actions" width="120">
+<template slot-scope="scope">
+<el-button @click="playVideo(scope.row.id)" type="primary" size="mini">Play</el-button>
+</template>
+</el-table-column>
+</el-table>
+</div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+data() {
+return {
+videos: [],
+};
+},
+async created() {
+const response = await axios.get('http://localhost:8080/api/videos');
+this.videos = response.data;
+},
+methods: {
+playVideo(id) {
+this.$router.push({ name: 'videoPlayer', params: { id } });
+},
+},
+};
+</script>
+
+`VideoStats.vue`:
+
+<template>
+<div>
+<h1>Video Stats</h1>
+<v-chart :options="chartOptions"></v-chart>
+</div>
+</template>
+
+<script>
+import { VChart } from 'v-charts';
+
+export default {
+components: {
+VChart,
+},
+data() {
+return {
+chartOptions: {
+grid: {
+top: '10%',
+left: '3%',
+right: '4%',
+bottom: '3%',
+containLabel: true,
+},
+xAxis: {
+type: 'category',
+data: ['Video 1', 'Video 2', 'Video 3'],
+},
+yAxis: {
+type: 'value',
+},
+series: [
+{
+name: 'Play Count',
+type: 'bar',
+data: [100, 200, 150],
+},
+{
+name: 'Like Count',
+type: 'bar',
+data: [80, 150, 100],
+},
+{
+name: 'Comment Count',
+type: 'bar',
+data: [50, 90, 70],
+},
+],
+},
+};
+},
+};
+</script>
+
+import VideoList from '@/views/VideoList.vue';
+import VideoStats from '@/views/VideoStats.vue';
+
+// ... existing routes ...
+
+export default new Router({
+routes: [
+// ... existing routes ...
+
+{
+path: '/videos',
+name: 'videoList',
+component: VideoList,
+},
+{
+path: '/stats',
+name: 'videoStats',
+component: VideoStats,
+},
+],
+});
+
+`UserFans.vue`:
+
+<template>
+<div>
+<h1>User Fans</h1>
+<el-table :data="fans" border>
+<el-table-column prop="username" label="Username" width="180"></el-table-column>
+<el-table-column prop="email" label="Email" width="260"></el-table-column>
+</el-table>
+</div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+data() {
+return {
+fans: [],
+};
+},
+async created() {
+const response = await axios.get('http://localhost:8080/api/user/fans', {
+headers: {
+Authorization: 'Bearer ' + localStorage.getItem('accessToken'),
+},
+});
+this.fans = response.data;
+},
+};
+</script>
+
+`DownloadVideo.vue`:
+
+<template>
+<div>
+<h1>Download Video</h1>
+<a :href="videoUrl" download="video.mp4" class="el-button el-button--primary">Download</a >
+</div>
+</template>
+
+<script>
+export default {
+data() {
+return {
+videoUrl: 'http://localhost:8080/api/videos/1', // replace with the correct video URL
+};
+},
+};
+</script>
+
+import UserFans from '@/views/UserFans.vue';
+import DownloadVideo from '@/views/DownloadVideo.vue';
+
+// ... existing routes ...
+
+export default new Router({
+routes: [
+// ... existing routes ...
+
+{
+path: '/user/fans',
+name: 'userFans',
+component: UserFans,
+},
+{
+path: '/download/:id',
+name: 'downloadVideo',
+component: DownloadVideo,
+},
+],
+});
