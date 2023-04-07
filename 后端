@@ -243,3 +243,147 @@ videoService.deleteVideo(id);
 }
 }
 
+//like.java
+package com.example.videosharing.entity;
+
+import javax.persistence.*;
+
+@Entity
+public class Like {
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+
+@ManyToOne
+private User user;
+
+@ManyToOne
+private Video video;
+
+// getters and setters
+}
+
+//Comment.java
+package com.example.videosharing.entity;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+public class Comment {
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+
+private String content;
+
+@ManyToOne
+private User user;
+
+@ManyToOne
+private Video video;
+
+private LocalDateTime timestamp;
+
+// getters and setters
+}
+
+//LikeRepository.java
+package com.example.videosharing.repository;
+
+import com.example.videosharing.entity.Like;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface LikeRepository extends JpaRepository<Like, Long> {
+}
+
+//CommentRepository.java
+package com.example.videosharing.repository;
+
+import com.example.videosharing.entity.Comment;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface CommentRepository extends JpaRepository<Comment, Long> {
+}
+
+//LikeService.java
+package com.example.videosharing.service;
+
+import com.example.videosharing.entity.Like;
+import com.example.videosharing.repository.LikeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class LikeService {
+@Autowired
+private LikeRepository likeRepository;
+
+public Like createLike(Like like) {
+return likeRepository.save(like);
+}
+
+public void deleteLike(Long id) {
+likeRepository.deleteById(id);
+}
+}
+
+//CommentService.java
+package com.example.videosharing.service;
+
+import com.example.videosharing.entity.Comment;
+import com.example.videosharing.repository.CommentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CommentService {
+@Autowired
+private CommentRepository commentRepository;
+
+public Comment createComment(Comment comment) {
+return commentRepository.save(comment);
+}
+
+public void deleteComment(Long id) {
+commentRepository.deleteById(id);
+}
+
+//VideoController.java
+// ... Other API methods ...
+
+@PostMapping("/{videoId}/likes")
+public ResponseEntity<?> createLike(@PathVariable Long videoId, @AuthenticationPrincipal UserDetails userDetails) {
+User user = userService.findByUsername(userDetails.getUsername());
+Video video = videoService.getVideoById(videoId);
+Like like = new Like();
+like.setUser(user);
+like.setVideo(video);
+likeService.createLike(like);
+return ResponseEntity.ok().build();
+}
+
+@DeleteMapping("/likes/{likeId}")
+public ResponseEntity<?> deleteLike(@PathVariable Long likeId) {
+likeService.deleteLike(likeId);
+return ResponseEntity.ok().build();
+}
+
+@PostMapping("/{videoId}/comments")
+public ResponseEntity<?> createComment(@PathVariable Long videoId, @RequestBody String content, @AuthenticationPrincipal UserDetails userDetails) {
+User user = userService.findByUsername(userDetails.getUsername());
+Video video = videoService.getVideoById(videoId);
+Comment comment = new Comment();
+comment.setUser(user);
+comment.setVideo(video);
+comment.setContent(content);
+comment.setTimestamp(LocalDateTime.now());
+commentService.createComment(comment);
+return ResponseEntity.ok().build();
+}
+@DeleteMapping("/comments/{commentId}")
+public ResponseEntity<?> deleteComment(@PathVariable Long commentId) {
+commentService.deleteComment(commentId);
+return ResponseEntity.ok().build();
+}
+}
