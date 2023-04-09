@@ -68,3 +68,26 @@ export default {
   gap: 20px;
 }
 </style>
+
+<!-- src/views/UserProfile.vue -->
+<template>
+  <!-- ... -->
+  <div class="user-videos">
+    <!-- ... -->
+  </div>
+  <follower-list :userId="user.id" />
+</template>
+
+<script>
+import FollowerList from '@/components/FollowerList.vue';
+// ...
+
+export default {
+  // ...
+  components: {
+    VideoItem,
+    FollowerList
+  },
+  // ...
+};
+</script>
