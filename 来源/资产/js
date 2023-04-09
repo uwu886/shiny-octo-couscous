@@ -1,0 +1,8 @@
+// src/components/SomeComponent.vue
+<script>
+import '@/assets/js/custom-script.js';
+
+export default {
+  name: 'SomeComponent'
+};
+</script>
